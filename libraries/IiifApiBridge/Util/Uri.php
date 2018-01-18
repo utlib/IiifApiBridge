@@ -56,14 +56,14 @@ class IiifApiBridge_Util_Uri {
      * @param string $type The type of URI to build. 
      * @param string $id
      * @param string $name
+     * @param string $hostPrefix (optional) The overriding host URL prefix.
      * @return string
      * @throws IiifApiBridge_Exception_UnknownUriTypeException
      */
-    public static function build($type, $id, $name) {
-        $serverUrlHelper = new Zend_View_Helper_ServerUrl;
-        $urlRoot = $serverUrlHelper->serverUrl();
-        $urlPrefix = public_url('');
-        $hostPrefix = $urlRoot . $urlPrefix;
+    public static function build($type, $id, $name, $hostPrefix=NULL) {
+        if (empty($hostPrefix)) {
+            $hostPrefix = self::localHostPrefix();
+        }
         switch ($type) {
             case self::COLLECTION:
                 return $hostPrefix . 'collection/' . $name;
@@ -86,5 +86,17 @@ class IiifApiBridge_Util_Uri {
             default:
                 throw new IiifApiBridge_Exception_UnknownUriTypeException;
         }
+    }
+    
+    /**
+     * Return the full URL prefix of the current Omeka installation.
+     * @return string
+     */
+    public static function localHostPrefix() {
+        return get_option('iiifapibridge_api_root') . '/';
+//        $serverUrlHelper = new Zend_View_Helper_ServerUrl;
+//        $urlRoot = $serverUrlHelper->serverUrl();
+//        $urlPrefix = public_url('');
+//        return $urlRoot . $urlPrefix;
     }
 }

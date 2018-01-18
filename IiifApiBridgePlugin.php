@@ -36,21 +36,35 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
      * Hook: On installation.
      */
 	public function hookInstall() {
-		
+		$db = get_db();
+        $db->query("CREATE TABLE IF NOT EXISTS `{$db->prefix}iiif_api_bridge_tasks` (" .
+<<<SQL
+`id` INT(10) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+`record_id` INT(10) NOT NULL,
+`record_type` VARCHAR(50) NOT NULL,
+`status` VARCHAR(8) NOT NULL DEFAULT 'queued',
+`url` VARCHAR(255) NOT NULL,
+`verb` VARCHAR(8) NOT NULL,
+`data` MEDIUMTEXT,
+`added` TIMESTAMP DEFAULT '2018-02-01 00:00:00',
+`modified` TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
+SQL
+        . ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
 	}
 	
     /**
      * Hook: On uninstallation.
      */
 	public function hookUninstall() {
-		
+		$db = get_db();
+        $db->query("DROP TABLE IF EXISTS `{$db->prefix}iiif_api_bridge_tasks`;");
 	}
 
     /**
      * Hook: On upgrade.
      * Run all pending migrations in order.
      */
-	public function hookUpgrade() {
+	public function hookUpgrade($args) {
 		$oldVersion = $args['old_version'];
         $newVersion = $args['new_version'];
         $doMigrate = false;
@@ -120,6 +134,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
         $collection = $args['collection'];
         $parentCollection = $args['parent_collection'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformCollection($json, $collection, $parentCollection);
+        IiifApiBridge_Queue_Collection::create($collection, $json);
     }
     
     /**
@@ -131,6 +147,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
         $collection = $args['collection'];
         $parentCollection = $args['parent_collection'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformCollection($json, $collection, $parentCollection);
+        IiifApiBridge_Queue_Collection::update($collection, $json);
     }
     
     /**
@@ -140,7 +158,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookIiifitemsDeleteCollection($args) {
         $collection = $args['collection'];
-        $parentCollection = $args['parent_collection'];
+//        $parentCollection = $args['parent_collection'];
+        IiifApiBridge_Queue_Collection::delete($collection->id);
     }
     
     /**
@@ -152,6 +171,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
         $manifest = $args['manifest'];
         $parentCollection = $args['parent_collection'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformManifest($json, $manifest, $parentCollection);
+        IiifApiBridge_Queue_Manifest::create($manifest, $json);
     }
     
     /**
@@ -163,6 +184,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
         $manifest = $args['manifest'];
         $parentCollection = $args['parent_collection'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformManifest($json, $manifest, $parentCollection);
+        IiifApiBridge_Queue_Manifest::update($manifest, $json);
     }
     
     /**
@@ -172,7 +195,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookIiifitemsDeleteManifest($args) {
         $manifest = $args['manifest'];
-        $parentCollection = $args['parent_collection'];
+//        $parentCollection = $args['parent_collection'];
+        IiifApiBridge_Queue_Manifest::delete($manifest->id);
     }
     
     /**
@@ -181,8 +205,10 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
      * @param array $args
      */
     public function hookIiifitemsNewCanvas($args) {
-        $canvas = $args['canvas'];
+        $canvas = $args['item'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformCanvas($json, $canvas);
+        IiifApiBridge_Queue_Canvas::create($canvas, $json);
     }
     
     /**
@@ -191,8 +217,10 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
      * @param array $args
      */
     public function hookIiifitemsEditCanvas($args) {
-        $canvas = $args['canvas'];
+        $canvas = $args['item'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformCanvas($json, $canvas);
+        IiifApiBridge_Queue_Canvas::update($canvas, $json);
     }
     
     /**
@@ -201,7 +229,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
      * @param array $args
      */
     public function hookIiifitemsDeleteCanvas($args) {
-        $canvas = $args['canvas'];
+        $canvas = $args['item'];
+        IiifApiBridge_Queue_Canvas::delete($canvas->collection_id, $canvas->id);
     }
     
     /**
@@ -213,6 +242,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
         $annotation = $args['annotation'];
         $attachedItem = $args['attached_item'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformAnnotation($json, $annotation, $attachedItem);
+        IiifApiBridge_Queue_Annotation::create($annotation, $json);
     }
     
     /**
@@ -224,6 +255,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
         $annotation = $args['annotation'];
         $attachedItem = $args['attached_item'];
         $json = $args['json'];
+        IiifApiBridge_Util_JsonTransform::transformAnnotation($json, $annotation, $attachedItem);
+        IiifApiBridge_Queue_Annotation::update($annotation, $json);
     }
     
     /**
@@ -234,5 +267,6 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
     public function hookIiifitemsDeleteAnnotation($args) {
         $annotation = $args['annotation'];
         $attachedItem = $args['attached_item'];
+        IiifApiBridge_Queue_Annotation::delete($attachedItem->collection_id, $annotation->id);
     }
 }

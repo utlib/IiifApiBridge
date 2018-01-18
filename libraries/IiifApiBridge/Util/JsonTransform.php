@@ -9,10 +9,14 @@ class IiifApiBridge_Util_JsonTransform {
      * Transform the URIs in the JSON collection in-place to the recommended format.
      * @param array &$json
      * @param Collection $collection
+     * @param Collection|null $parentCollection
      */
-    public static function transformCollection(&$json, $collection) {
+    public static function transformCollection(&$json, $collection, $parentCollection=NULL) {
         // Replace the top-level URI
         $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $collection->id);
+        // Add belongsTo attribute
+        $root = get_option('iiifapibridge_api_root') . '/';
+        $json['belongsTo'] = empty($parentCollection) ? array() : array(IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $parentCollection->id, $root));
         
         // Replace URI for sub-manifests
         if (!empty($json['manifests'])) {
@@ -47,13 +51,17 @@ class IiifApiBridge_Util_JsonTransform {
      * Transform the URIs in the JSON manifest in-place to the recommended format.
      * @param array $json
      * @param Collection $manifest
+     * @param Collection|null $parentCollection
      */
-    public static function transformManifest(&$json, $manifest) {
+    public static function transformManifest(&$json, $manifest, $parentCollection=NULL) {
         // Find contained items
         $containedItems = get_db()->getTable('Item')->findBy(array('collection_id' => $manifest->id));
         $currentContainedItem = 0;
         // Replace top-level URI
         $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::MANIFEST, $manifest->id, NULL);
+        // Add belongsTo attribute
+        $root = get_option('iiifapibridge_api_root') . '/';
+        $json['belongsTo'] = empty($parentCollection) ? array() : array(IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $parentCollection->id, $root));
         // For each seqnum => sequence
         foreach ($json['sequences'] as $seqnum => &$sequence) {
             // Change JSON ID to recommended form, id=item.collection_id, name=seqnum
@@ -86,7 +94,11 @@ class IiifApiBridge_Util_JsonTransform {
      */
     public static function transformCanvas(&$json, $item) {
         // Change the top-level URI
-        $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $item->collection_id, $item->id);
+        $root = get_option('iiifapibridge_api_root') . '/';
+        $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $item->collection_id, $item->id, $root);
+        // Add belongsTo and embeddedEntirely attribute
+//        $json['belongsTo'] = array(IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::SEQUENCE, $item->collection_id, 0, $root));
+//        $json['embeddedEntirely'] = true;
         // For each imagenum => image
         foreach ($json['images'] as $imageNum => &$image) {
             // Change URI to recommended form, id=item.collection_id, name=i-item.id-imagenum
@@ -105,6 +117,15 @@ class IiifApiBridge_Util_JsonTransform {
                 }
             }
         }
+        // If empty, add dummy annotation list for future annotations to latch onto
+        else {
+            $json['otherContent'] = array(
+                array(
+                    '@id' => IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::ANNOTATION_LIST, $item->collection_id, $item->id),
+                    '@type' => 'sc:AnnotationList',
+                ),
+            );
+        }
     }
     
     /**
@@ -113,22 +134,32 @@ class IiifApiBridge_Util_JsonTransform {
      * @param Item $item
      */
     public static function transformAnnotation(&$json, $item, $attachedItem) {
+        // Get the URI root
+        $root = get_option('iiifapibridge_api_root') . '/';
         // Replace JSON ID with transformed URL, id=attached_item.collection_id, name=item.id
         $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::ANNOTATION, $attachedItem->collection_id, $item->id);
+        // Belongs entirely within the annotation list of attached item
+        $json['belongsTo'] = array(IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::ANNOTATION_LIST, $attachedItem->collection_id, $attachedItem->id, $root));
+        $json['embeddedEntirely'] = true;
+        // COMPROMISE: Replace resource with a format that the API understands (strip tags, add @id)
+        $json['resource'] = $json['resource'][0];
+        $json['resource']['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::RESOURCE, $attachedItem->collection_id, "a-{$item->id}");
         // If on is a string containing xywh=
         if (is_string($json['on']) && ($sp = strpos($json['on'], '#xywh=')) !== FALSE) {
             // Replace JSON ID with transformed URL (id=attached_item.collection_id, name=$attached_item.id), plus xywh= portion
-            $json['on'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id) . substr($json['on'], $sp);
+            $json['on'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id, $root) . substr($json['on'], $sp);
         }
         // If on is an array
         elseif (is_array($json['on'])) {
-            // For each on
-            foreach ($json['on'] as &$attachOn) {
-                // Replace full JSON ID with recommended URI, id=attached_item.collection_id, name=attached_item.id
-                $attachOn['full'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id);
-                // Replace within JSON ID with recommended URI, id=attached_item.collection_id
-                $attachOn['within'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::MANIFEST, $attachedItem->collection_id, NULL);
-            }
+            // COMPROMISE: Take on XYWH area of first region
+            $json['on'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id, $root) . '#' . $json['on'][0]['selector']['default']['value'];
+//            // For each on
+//            foreach ($json['on'] as &$attachOn) {
+//                // Replace full JSON ID with recommended URI, id=attached_item.collection_id, name=attached_item.id
+//                $attachOn['full'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id);
+//                // Replace within JSON ID with recommended URI, id=attached_item.collection_id
+//                $attachOn['within'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::MANIFEST, $attachedItem->collection_id, NULL);
+//            }
         }
     }
     
@@ -141,7 +172,8 @@ class IiifApiBridge_Util_JsonTransform {
         // Find annotations under this item
         $referenceAnnotations = IiifItems_Util_Annotation::findAnnotationItemsUnder($item);
         // Transform the top-level URI
-        $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::ANNOTATION_LIST, $item->collection_id, $item->id);
+        $root = get_option('iiifapibridge_api_root') . '/';
+        $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::ANNOTATION_LIST, $item->collection_id, $item->id, $root);
         // Transform the annotation URIs
         foreach ($json['resources'] as $annoNum => &$annotation) {
             self::transformAnnotation($annotation, $referenceAnnotations[$annoNum], $item);
