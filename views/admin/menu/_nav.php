@@ -2,8 +2,8 @@
     <?php
     $navArray = array(
         array(
-            'label' => __('Import Items'),
-            'uri' => url('iiif-items/import'),
+            'label' => __('System Status'),
+            'uri' => url('iiif-api-bridge/status'),
         ),
     );
     echo nav($navArray, 'admin_navigation_settings');

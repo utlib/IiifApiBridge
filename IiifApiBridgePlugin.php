@@ -22,6 +22,7 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
 	);
 
 	protected $_filters = array(
+        'admin_navigation_main',
 	);
 
     /**
@@ -239,5 +240,22 @@ SQL
                 'insert' => false,
             ), false);
         }
+    }
+    
+    /**
+     * Filter: Admin-side main nav
+     * Add the IIIF API Sync Bridge admin screen for admins and super-users
+     * @param type $nav
+     * @return type
+     */
+    public function filterAdminNavigationMain($nav) {
+        $user = current_user();
+        if (!empty($user) && ($user->role == 'super' || $user->role == 'admin')) {
+            $nav[] = array(
+                'label' => __("IIIF API Sync"),
+                'uri' => url('iiif-api-bridge'),
+            );
+        }
+        return $nav;
     }
 }
