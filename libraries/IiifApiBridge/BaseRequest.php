@@ -90,12 +90,12 @@ class IiifApiBridge_BaseRequest {
              ->setRawData(json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE))
              ->request($this->__lastVerb);
         $status = $response->getStatus();
-        $body = json_decode($response->getBody(), false);
+        $body = json_decode($response->getBody(), true);
         debug("Outgoing request: " . json_encode($json, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-        if ($status != 200) {
+        $statusType = floor($status/100);
+        if ($statusType != 2 && $statusType != 3) {
             debug("IIIF API {$status}: " . $response->getBody());
-        }
-        if ($status / 100 === 2) {
+        } else {
             return $body;
         }
         throw new IiifApiBridge_Exception_FailedJsonRequestException($status, $body);
