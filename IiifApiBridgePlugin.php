@@ -43,6 +43,9 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
 `modified` TIMESTAMP DEFAULT NOW() ON UPDATE NOW()
 SQL
         . ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        set_option('iiifapibridge_api_key', '');
+        set_option('iiifapibridge_api_root', '');
+        set_option('iiifapibridge_daemon_id', '');
 	}
 	
     /**
@@ -51,7 +54,10 @@ SQL
 	public function hookUninstall() {
 		$db = get_db();
         $db->query("DROP TABLE IF EXISTS `{$db->prefix}iiif_api_bridge_tasks`;");
-	}
+        delete_option('iiifapibridge_api_key');
+        delete_option('iiifapibridge_api_root');
+        delete_option('iiifapibridge_daemon_id');
+    }
 
     /**
      * Hook: On upgrade.
