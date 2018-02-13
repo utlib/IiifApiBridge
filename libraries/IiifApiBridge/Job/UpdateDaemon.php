@@ -41,7 +41,7 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
     /**
      * The maximum timeout for a queued API task.
      */
-    const TIMEOUT = 10;
+    const TIMEOUT = 180;
     
     /**
      * Main runnable method.
@@ -83,42 +83,44 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
             $request = new IiifApiBridge_Request_Daemon();
             $requestResponse = $request->push($task->url, $task->verb, $task->getJsonData());
             debug('Request response: ' . json_encode($requestResponse));
-            $queueUrl = $this->transformQueueUrl($requestResponse['status']);
-            debug('Request accepted. Queue: ' . $queueUrl);
-            // Start checking the queue
-            $timeElapsed = 0;
-            $resultReceived = false;
-            $delay = self::INITIAL_DELAY;
-            $queueRequester = new IiifApiBridge_Request_Queue();
-            $queueResponseCode = 500;
-            // Loop until result is received or on timeout
-            do {
-                sleep($delay);
-                $queueResult = $queueRequester->status($queueUrl);
-                if (isset($queueResult['responseCode'])) {
-                    $resultReceived = true;
-                    $queueResponseCode = (int) $queueResult['responseCode'];
-                } else {
-                    // If over timeout, fail
-                    if ($timeElapsed >= self::TIMEOUT) {
-                        $task->fail();
-                        debug('Queue timed out.');
-                        return;
-                    }
-                    // Otherwise, delay and increase the delay
-                    else {
-                        debug('Re-check in ' . $delay . 's...');
-                        $timeElapsed += $delay;
-                        if ($delay < self::MAX_DELAY) {
-                            $delay += self::DELAY_INCREMENT;
+            if (isset($requestResponse['status']) && strpos($requestResponse['status'], '/queue/')) {
+                $queueUrl = $this->transformQueueUrl($requestResponse['status']);
+                debug('Request accepted. Queue: ' . $queueUrl);
+                // Start checking the queue
+                $timeElapsed = 0;
+                $resultReceived = false;
+                $delay = self::INITIAL_DELAY;
+                $queueRequester = new IiifApiBridge_Request_Queue();
+                $queueResponseCode = 500;
+                // Loop until result is received or on timeout
+                do {
+                    sleep($delay);
+                    $queueResult = $queueRequester->status($queueUrl);
+                    if (isset($queueResult['responseCode'])) {
+                        $resultReceived = true;
+                        $queueResponseCode = (int) $queueResult['responseCode'];
+                    } else {
+                        // If over timeout, fail
+                        if ($timeElapsed >= self::TIMEOUT) {
+                            $task->fail();
+                            debug('Queue timed out.');
+                            return;
+                        }
+                        // Otherwise, delay and increase the delay
+                        else {
+                            debug('Re-check in ' . $delay . 's...');
+                            $timeElapsed += $delay;
+                            if ($delay < self::MAX_DELAY) {
+                                $delay += self::DELAY_INCREMENT;
+                            }
                         }
                     }
+                } while (!$resultReceived);
+                debug('Queue passed after ' . $timeElapsed . 's.');
+                // Look for failures
+                if (floor($queueResponseCode / 100) != 2) {
+                    throw new IiifApiBridge_Exception_FailedJsonRequestException($queueResponseCode, $queueResult);
                 }
-            } while (!$resultReceived);
-            debug('Queue passed after ' . $timeElapsed . 's.');
-            // Look for failures
-            if (floor($queueResponseCode / 100) != 2) {
-                throw new IiifApiBridge_Exception_FailedJsonRequestException($queueResponseCode, $queueResult);
             }
         }
         // Catch request failures
