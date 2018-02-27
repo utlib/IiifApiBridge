@@ -86,4 +86,47 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
         // Return the inserted task
         return $newTask;
     }
+    
+    /**
+     * Insert a daemon update tas with backup URL and verb.
+     * @param Record|array $record A Collection, Item, or associative array with 'type' and 'id' keys
+     * @param string $url URL to request
+     * @param string $verb The verb of the request
+     * @param string $backupUrl Backup URL to request
+     * @param string $backupVerb The backup verb of the request
+     * @param array $body The JSON body of the request (POST and PUT only)
+     * @return IiifApiBridge_Task The inserted task.
+     */
+    public function insertTaskWithBackupFor($record, $url, $verb, $backupUrl, $backupVerb, $body=array()) {
+        // Insert the task
+        $newTask = new IiifApiBridge_Task();
+        if (is_array($record)) {
+            $newTask->record_type = $record['type'];
+            $newTask->record_id = $record['id'];
+        } else {
+            $newTask->record_type = get_class($record);
+            $newTask->record_id = $record->id;
+        }
+        $newTask->status = IiifApiBridge_Task::STATUS_QUEUED;
+        $newTask->url = $url;
+        $newTask->verb = strtoupper($verb);
+        $newTask->backup_url = $backupUrl;
+        $newTask->backup_verb = strtoupper($backupVerb);
+        $newTask->data = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $newTask->save();
+        
+        // Boot the daemon if enabled but not started
+        if (empty(get_option('iiifapibridge_daemon_id')) && !empty(get_option('iiifapibridge_daemon_enabled'))) {
+            Zend_Registry::get('bootstrap')->getResource('jobs')->sendLongRunning('IiifApiBridge_Job_UpdateDaemon', array());
+            $processTable = get_db()->getTable('Process');
+            $processSelect = $processTable->getSelect();
+            $processSelect->order('id DESC');
+            $processSelect->where("args LIKE '%IiifApiBridge_Job_UpdateDaemon%'");
+            $daemonProcess = $processTable->fetchObject($processSelect);
+            set_option('iiifapibridge_daemon_id', $daemonProcess->id);
+        }
+        
+        // Return the inserted task
+        return $newTask;
+    }
 }

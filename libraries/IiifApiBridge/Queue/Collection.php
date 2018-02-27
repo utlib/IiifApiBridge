@@ -31,7 +31,8 @@ class IiifApiBridge_Queue_Collection {
      * @return IiifApiBridge_Task The created task.
      */
     public static function create($collection, $json) {
-        return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor($collection, '/collections', 'POST', array(
+        $convertedBackupPath = '/' . join('/', array_slice($pathComponents, -2));
+        return get_db()->getTable('IiifApiBridge_Task')->insertTaskWithBackupFor($collection, '/collections', 'POST', $convertedBackupPath, 'PUT', array(
             'collection' => $json
         ));
     }
@@ -45,7 +46,7 @@ class IiifApiBridge_Queue_Collection {
     public static function update($collection, $json) {
         $pathComponents = split('/', $json['@id']);
         $convertedPath = '/' . join('/', array_slice($pathComponents, -2));
-        return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor($collection, $convertedPath, 'PUT', array(
+        return get_db()->getTable('IiifApiBridge_Task')->insertTaskWithBackupFor($collection, $convertedPath, 'PUT', '/collections', 'POST', array(
             'collection' => $json
         ));
     }

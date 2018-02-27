@@ -60,7 +60,9 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
             $taskTable = get_db()->getTable('IiifApiBridge_Task');
             while ($task = $taskTable->getNextAvailableTask()) {
                 debug('Performing task #' . $task->id . ':');
-                $this->performTask($task);
+                if (!$this->tryTask($task) && !empty($task->backup_url)) {
+                    $this->retryTask($task);
+                }
                 debug('Task #' . $task->id . ' completed.');
             }
             debug('Daemon going back to sleep.');
@@ -71,17 +73,48 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
     }
     
     /**
+     * Perform a single queued task (first try).
+     * @param IiifApiBridge_Task $task
+     * @return boolean Whether it is successful
+     */
+    private function tryTask($task) {
+        return $this->performTask($task);
+    }
+    
+    /**
+     * Perform a single queued task (second try).
+     * @param IiifApiBridge_Task $task
+     * @return boolean Whether it is successful
+     */
+    private function retryTask($task) {
+        $result = $this->performTask($task, true);
+        if (!$result) {
+            $task->fail();
+        }
+        return $result;
+    }
+    
+    /**
      * Perform a single queued task.
      * @param IiifApiBridge_Task $task
+     * @param boolean $retry Whether this is the second try
+     * @return boolean Whether it is successful
      */
-    private function performTask($task) {
+    private function performTask($task, $retry=false) {
         try {
             // Start the task
             $task->start();
             // Make the request
             debug('Making initial request...');
             $request = new IiifApiBridge_Request_Daemon();
-            $requestResponse = $request->push($task->url, $task->verb, $task->getJsonData());
+            if ($retry) {
+                $targetUrl = $task->backup_url;
+                $targetVerb = $task->backup_verb;
+            } else {
+                $targetUrl = $task->url;
+                $targetVerb = $task->verb;
+            }
+            $requestResponse = $request->push($targetUrl, $targetVerb, $task->getJsonData());
             debug('Request response: ' . json_encode($requestResponse));
             if (isset($requestResponse['status']) && strpos($requestResponse['status'], '/queue/')) {
                 $queueUrl = $this->transformQueueUrl($requestResponse['status']);
@@ -102,9 +135,8 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
                     } else {
                         // If over timeout, fail
                         if ($timeElapsed >= self::TIMEOUT) {
-                            $task->fail();
                             debug('Queue timed out.');
-                            return;
+                            return false;
                         }
                         // Otherwise, delay and increase the delay
                         else {
@@ -126,16 +158,16 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
         // Catch request failures
         catch (IiifApiBridge_Exception_FailedJsonRequestException $ex) {
             debug("IIIF API Daemon - Task #{$task->id} failed with HTTP {$ex->getResponseCode()}: " . json_encode($ex->getResponseBody(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-            $task->fail();
-        
+            return false;
         }
         // Catch other failures
         catch (Exception $ex) {
             debug("IIIF API Daemon - Task #{$task->id} failed with exception: {$ex->getMessage()}");
-            $task->fail();
+            return false;
         }
         // Finish the task
         $task->finish();
+        return true;
     }
     
     /**

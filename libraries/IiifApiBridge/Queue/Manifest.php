@@ -33,7 +33,7 @@ class IiifApiBridge_Queue_Manifest {
     public static function create($manifest, $json) {
         $pathComponents = split('/', $json['@id']);
         $convertedPath = '/' . join('/', array_slice($pathComponents, -2));
-        return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor($manifest, $convertedPath, 'POST', array(
+        return get_db()->getTable('IiifApiBridge_Task')->insertTaskWithBackupFor($manifest, $convertedPath, 'POST', $convertedPath, 'PUT', array(
             'manifest' => $json
         ));
     }
@@ -47,7 +47,7 @@ class IiifApiBridge_Queue_Manifest {
     public static function update($manifest, $json) {
         $pathComponents = split('/', $json['@id']);
         $convertedPath = '/' . join('/', array_slice($pathComponents, -2));
-        return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor($manifest, $convertedPath, 'PUT', array(
+        return get_db()->getTable('IiifApiBridge_Task')->insertTaskWithBackupFor($manifest, $convertedPath, 'PUT', $convertedPath, 'POST', array(
             'manifest' => $json
         ));
     }
