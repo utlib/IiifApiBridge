@@ -81,6 +81,18 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
     public $verb;
     
     /**
+     * The backup URL to use for the request, if the first fails.
+     * @var string
+     */
+    public $backup_url;
+    
+    /**
+     * The backup verb to use for the request, if the first fails.
+     * @var string
+     */
+    public $backup_verb;
+    
+    /**
      * Body data for the task.
      * @var string
      */
