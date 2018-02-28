@@ -24,9 +24,66 @@
  */
 class IiifApiBridge_UpdateController extends Omeka_Controller_AbstractActionController {
     
+    /**
+     * Initiate an update for the given collection/item.
+     * Redirect back if successful.
+     * @throws Omeka_Controller_Exception_404
+     */
     public function updateAction() {
         if (is_admin_theme()) {
-            $this->_respondWithJson($_POST);
+            $thingType = $this->getParam('thing_type');
+            $thingId = $this->getParam('thing_id');
+            // Recognize collections and items only
+            if (($thingType != 'Collection' && $thingType != 'Item')) {
+                $this->_helper->flashMessenger(__("Invalid type."), 'error');
+                Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->gotoUrl('/');
+                return;
+            }
+            // Find thing, redirect if not found
+            $thing = get_record_by_id($thingType, $thingId);
+            if (empty($thing)) {
+                $this->_helper->flashMessenger(__("Missing update target."), 'error');
+                Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->gotoUrl('/');
+                return;
+            }
+            // Force-sync item if it is a canvas or annotation
+            if ($thingType == 'Item' && !IiifItems_Util_Canvas::isNonIiifItem($thing)) {
+                if ($thing->item_type_id != get_option('iiifitems_annotation_item_type')) {
+                    $json = IiifItems_Util_Canvas::buildCanvas($thing);
+                    IiifApiBridge_Util_JsonTransform::transformCanvas($json, $thing);
+                    IiifApiBridge_Queue_Canvas::update($thing, $json);
+                    $this->_helper->flashMessenger(__("The canvas has been placed on API sync queue. Please check back for updates."), 'success');
+                } else {
+                    $annotatedItem = IiifItems_Util_Annotation::findAnnotatedItemFor($thing);
+                    $json = IiifItems_Util_Annotation::buildAnnotation($thing);
+                    IiifApiBridge_Util_JsonTransform::transformAnnotation($json, $thing, $annotatedItem);
+                    IiifApiBridge_Queue_Annotation::update($thing, $json);
+                    $this->_helper->flashMessenger(__("The annotation has been placed on API sync queue. Please check back for updates."), 'success');
+                }
+                Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->gotoUrl('/items/show/' . $thingId);
+                return;
+            }
+            // Force-sync collection if it is a manifest or collection
+            if ($thingType == 'Collection' && (IiifItems_Util_Manifest::isManifest($thing) || IiifItems_Util_Collection::isCollection($thing))) {
+                if (IiifItems_Util_Manifest::isManifest($thing)) {
+                    $parentCollection = IiifItems_Util_Manifest::findParentFor($thing);
+                    $json = IiifItems_Util_Manifest::buildManifest($thing);
+                    IiifApiBridge_Util_JsonTransform::transformManifest($json, $thing, $parentCollection);
+                    IiifApiBridge_Queue_Manifest::update($thing, $json);
+                    $this->_helper->flashMessenger(__("The manifest has been placed on API sync queue. Please check back for updates."), 'success');
+                } else {
+                    $parentCollection = IiifItems_Util_Collection::findParentFor($thing);
+                    $json = IiifItems_Util_Collection::buildCollection($thing);
+                    IiifApiBridge_Util_JsonTransform::transformCollection($json, $thing, $parentCollection);
+                    IiifApiBridge_Queue_Collection::update($thing, $json);
+                    $this->_helper->flashMessenger(__("The collection has been placed on API sync queue. Please check back for updates."), 'success');
+                }
+                Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->gotoUrl('/collections/show/' . $thingId);
+                return;
+            }
+            // Didn't hit any of the above, indicate that there's nothing
+            $this->_helper->flashMessenger(__("This cannot be synchronized with the IIIF API."), 'error');
+            Zend_Controller_Action_HelperBroker::getStaticHelper('redirector')->gotoUrl('/' . strtolower($thingType) . '/show/' . $thingId);
         } else {
             throw new Omeka_Controller_Exception_404;
         }
