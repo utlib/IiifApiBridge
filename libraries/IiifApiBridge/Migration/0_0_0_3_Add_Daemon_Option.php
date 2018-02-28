@@ -23,18 +23,18 @@
  * @package IiifApiBridge/Migration
  */
 class IiifApiBridge_Migration_0_0_0_3_Add_Daemon_Option extends IiifApiBridge_BaseMigration {
-    
+
     /**
      * The applicable version for this migration.
      * @var string
      */
     public static $version = '0.0.0.3';
-    
+
     /**
      * Migrate up.
      */
     public function up() {
         set_option('iiifapibridge_daemon_enabled', '1');
     }
-    
+
 }

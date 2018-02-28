@@ -23,7 +23,7 @@
  * @package IiifApiBridge/Queue
  */
 class IiifApiBridge_Queue_Collection {
-    
+
     /**
      * Submit a JSON collection to the API for creation.
      * @param Collection $collection
@@ -36,7 +36,7 @@ class IiifApiBridge_Queue_Collection {
             'collection' => $json
         ));
     }
-    
+
     /**
      * Submit a JSON collection to the API for updating.
      * @param Collection $collection
@@ -50,7 +50,7 @@ class IiifApiBridge_Queue_Collection {
             'collection' => $json
         ));
     }
-    
+
     /**
      * Request that the API delete a collection with the given name in its URI.
      * @param string $name
@@ -59,5 +59,5 @@ class IiifApiBridge_Queue_Collection {
     public static function delete($name) {
         return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor(array('id' => $name, 'type' => 'Collection'), '/collection/' . $name, 'DELETE', NULL);
     }
-    
+
 }

@@ -23,13 +23,13 @@
  * @package IiifApiBridge/Migration
  */
 class IiifApiBridge_Migration_0_0_0_4_Add_Backup_Verb extends IiifApiBridge_BaseMigration {
-    
+
     /**
-     *
-     * @var type 
+     * The applicable version for this migration.
+     * @var type
      */
     public static $version = '0.0.0.4';
-    
+
     /**
      * Migrate up.
      */
@@ -41,5 +41,5 @@ ADD `backup_verb` VARCHAR(8) NULL AFTER `backup_url`;
 SQL
         );
     }
-    
+
 }

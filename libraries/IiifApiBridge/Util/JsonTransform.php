@@ -25,17 +25,17 @@ class IiifApiBridge_Util_JsonTransform {
             $referenceSubmanifests = IiifItems_Util_Collection::findSubmanifestsFor($collection);
             foreach ($json['manifests'] as $i => &$submanifest) {
                 $submanifest['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::MANIFEST, $referenceSubmanifests[$i]->id, NULL);
-            } 
+            }
         }
-        
+
         // Replace URI for sub-collections
         if (!empty($json['collections'])) {
             $referenceSubcollections = IiifItems_Util_Collection::findCollectionsFor($collection);
             foreach ($json['collections'] as $i => &$subcollection) {
                 $subcollection['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $referenceSubcollections[$i]->id);
-            } 
+            }
         }
-        
+
         // Replace URI for sub-members
         if (!empty($json['members'])) {
             $referenceSubmembers = IiifItems_Util_Collection::findSubmembersFor($collection);
@@ -45,10 +45,10 @@ class IiifApiBridge_Util_JsonTransform {
                 } else {
                     $submember['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $referenceSubmembers[$i]->id);
                 }
-            } 
+            }
         }
     }
-    
+
     /**
      * Transform the URIs in the JSON manifest in-place to the recommended format.
      * @param array $json
@@ -91,7 +91,7 @@ class IiifApiBridge_Util_JsonTransform {
             }
         }
     }
-    
+
     /**
      * Transform the URIs in the JSON canvas in-place to the recommended format.
      * @param array $json
@@ -129,7 +129,7 @@ class IiifApiBridge_Util_JsonTransform {
             );
         }
     }
-    
+
     /**
      * Transform the URIs in the JSON annotation in-place to the recommended format.
      * @param array $json
@@ -157,7 +157,7 @@ class IiifApiBridge_Util_JsonTransform {
             $json['on'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id, $root) . '#' . $json['on'][0]['selector']['default']['value'];
         }
     }
-    
+
     /**
      * Transform the URIs in the JSON annotation list in-place to the recommended format.
      * @param array $json
@@ -174,7 +174,7 @@ class IiifApiBridge_Util_JsonTransform {
             self::transformAnnotation($annotation, $referenceAnnotations[$annoNum], $item);
         }
     }
-    
+
     /**
      * Return whether a string starts with the given substring.
      * @param string $str The source string.

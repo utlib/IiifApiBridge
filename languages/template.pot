@@ -1,12 +1,199 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
-"Report-Msgid-Bugs-To: "
-"POT-Creation-Date: 2016-01-01 00:00-0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Project-Id-Version: Translation for the IIIF Toolkit / IIIF API "
+"Synchronization Bridge Plugin\n"
+"Report-Msgid-Bugs-To: POT-Creation-Date: 2016-01-01 00:00-0000\n"
+"POT-Creation-Date: 2018-04-02 15:29-0500\n"
+"PO-Revision-Date: 2018-04-02 15:29-0500\n"
+"Last-Translator: Dickson Law <dickson.law@utoronto.ca>\n"
+"Language-Team: University of Toronto Libraries <exhibits@library.utoronto."
+"ca>\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+"X-Poedit-KeywordsList: __;gettext;gettext_noop;plural:1,2\n"
+"X-Poedit-Basepath: /home/developer/IiifApiBridge\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: sidebar.php:2 IiifApiBridgePlugin.php:304
+msgid "IIIF API Sync"
+msgstr ""
+
+#: sidebar.php:4
+msgid "This item has never been synchronized."
+msgstr ""
+
+#: sidebar.php:4
+msgid "This collection has never been synchronized."
+msgstr ""
+
+#: sidebar.php:6
+#, php-format
+msgid "Last sync: %s"
+msgstr ""
+
+#: sidebar.php:7
+#, php-format
+msgid "Status: %s"
+msgstr ""
+
+#: sidebar.php:12
+msgid "Push up"
+msgstr ""
+
+#: IiifApiBridgePlugin.php:112
+msgid "Invalid CSRF token."
+msgstr ""
+
+#: views/admin/menu/_nav.php:5
+msgid "System Status"
+msgstr ""
+
+#: views/admin/menu/status.php:3
+msgid "IIIF API Bridge"
+msgstr ""
+
+#: views/admin/menu/status.php:9
+msgid "API Authentication"
+msgstr ""
+
+#: views/admin/menu/status.php:13 views/admin/menu/status.php:19
+msgid "Refresh"
+msgstr ""
+
+#: views/admin/menu/status.php:15
+msgid "Sync Daemon"
+msgstr ""
+
+#: views/admin/menu/status.php:21
+msgid "Force Restart"
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:17
+msgid "Daemon Enabled?"
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:18
+msgid ""
+"Whether to automatically run the update daemon upon creating, updating or "
+"deleting a IIIF-enabled resource. Please turn off before doing batch "
+"operations to minimize server load."
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:22
+msgid "IIIF API Root"
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:23
+msgid "The base URL of the IIIF API installation."
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:27
+msgid "API Key"
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:28
+msgid "The authentication key for the account to use on IIIF API."
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:32
+msgid "Top-Level Collection Name"
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:33
+msgid ""
+"Name of the top-level collection at the API to synchronize with. If left "
+"blank, this plugin will synchronize with the API's top-level collection."
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:37
+msgid "Top-Level Prefix"
+msgstr ""
+
+#: libraries/IiifApiBridge/Form/Config.php:38
+msgid "Prefix to add before item/collection IDs while mapping to API URIs."
+msgstr ""
+
+#: controllers/UpdateController.php:38
+msgid "Invalid type."
+msgstr ""
+
+#: controllers/UpdateController.php:45
+msgid "Missing update target."
+msgstr ""
+
+#: controllers/UpdateController.php:55
+msgid ""
+"The canvas has been placed on API sync queue. Please check back for updates."
+msgstr ""
+
+#: controllers/UpdateController.php:61
+msgid ""
+"The annotation has been placed on API sync queue. Please check back for "
+"updates."
+msgstr ""
+
+#: controllers/UpdateController.php:73
+msgid ""
+"The manifest has been placed on API sync queue. Please check back for "
+"updates."
+msgstr ""
+
+#: controllers/UpdateController.php:79
+msgid ""
+"The collection has been placed on API sync queue. Please check back for "
+"updates."
+msgstr ""
+
+#: controllers/UpdateController.php:85
+msgid "This cannot be synchronized with the IIIF API."
+msgstr ""
+
+#: controllers/MenuController.php:78
+msgid "You are signed into IIIF API."
+msgstr ""
+
+#: controllers/MenuController.php:80
+msgid "Failed to sign into IIIF API."
+msgstr ""
+
+#: controllers/MenuController.php:82
+#, php-format
+msgid "Please check your %sconfigurations for IIIF API Root and API Key%s."
+msgstr ""
+
+#: controllers/MenuController.php:84
+msgid "Please contact your system administrator "
+msgstr ""
+
+#: controllers/MenuController.php:99
+msgid "The daemon is starting."
+msgstr ""
+
+#: controllers/MenuController.php:101
+msgid "The daemon is running."
+msgstr ""
+
+#: controllers/MenuController.php:103
+msgid "The daemon has completed its current batch."
+msgstr ""
+
+#: controllers/MenuController.php:105
+msgid "The daemon is stopped."
+msgstr ""
+
+#: controllers/MenuController.php:107
+msgid "The daemon is paused."
+msgstr ""
+
+#: controllers/MenuController.php:109
+msgid ""
+"The daemon has crashed from an unexpected error. Please manually restart the "
+"daemon if there are pending jobs."
+msgstr ""
+
+#: controllers/MenuController.php:114
+msgid "The daemon is sleeping."
+msgstr ""

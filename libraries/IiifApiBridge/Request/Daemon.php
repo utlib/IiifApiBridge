@@ -22,7 +22,7 @@
  * @author University of Toronto Libraries
  */
 class IiifApiBridge_Request_Daemon extends IiifApiBridge_BaseRequest {
-    
+
     /**
      * Push data to the remote location
      * @param string $url
@@ -32,5 +32,5 @@ class IiifApiBridge_Request_Daemon extends IiifApiBridge_BaseRequest {
     public function push($url, $verb, $body=null) {
         return $this->authJsonRequest($verb, $url, $body);
     }
-    
+
 }

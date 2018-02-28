@@ -23,7 +23,7 @@
  * @package IiifApiBridge/Queue
  */
 class IiifApiBridge_Queue_Canvas {
-    
+
     /**
      * Submit a JSON canvas to the API for creation.
      * @param Item $item
@@ -38,7 +38,7 @@ class IiifApiBridge_Queue_Canvas {
             'canvas' => $json
         ));
     }
-    
+
     /**
      * Submit a JSON canvas to the API for updating.
      * @param Item $item
@@ -53,7 +53,7 @@ class IiifApiBridge_Queue_Canvas {
             'canvas' => $json
         ));
     }
-    
+
     /**
      * Request that the API delete a canvas with the given item ID and name in its URI.
      * @param string $id The item ID.
@@ -63,5 +63,5 @@ class IiifApiBridge_Queue_Canvas {
     public static function delete($id, $name) {
         return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor(array('id' => $id, 'type' => 'Item'), "/{$id}/canvas/{$name}", 'DELETE', array());
     }
-    
+
 }

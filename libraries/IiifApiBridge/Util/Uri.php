@@ -9,51 +9,51 @@ class IiifApiBridge_Util_Uri {
      * Indicate the collection type.
      */
     const COLLECTION = 'Collection';
-    
+
     /**
      * Indicate the manifest type.
      */
     const MANIFEST = 'Manifest';
-    
+
     /**
      * Indicate the sequence type.
      */
     const SEQUENCE = 'Sequence';
-    
+
     /**
      * Indicate the canvas type.
      */
     const CANVAS = 'Canvas';
-    
+
     /**
      * Indicate the annotation type.
      */
     const ANNOTATION = 'Annotation';
-    
+
     /**
      * Indicate the annotation list type.
      */
     const ANNOTATION_LIST = 'AnnotationList';
-    
+
     /**
      * Indicate the range type.
      */
     const RANGE = 'Range';
-    
+
     /**
      * Indicate the layer type.
      */
     const LAYER = 'Layer';
-    
+
     /**
      * Indicate the general resource type.
      */
     const RESOURCE = 'Resource';
-    
+
     /**
      * Build a URI in IIIF Presentation API 2.x recommended form, with top-level prefix added.
-     * 
-     * @param string $type The type of URI to build. 
+     *
+     * @param string $type The type of URI to build.
      * @param string $id
      * @param string $name
      * @param string $hostPrefix (optional) The overriding host URL prefix.
@@ -66,11 +66,11 @@ class IiifApiBridge_Util_Uri {
         }
         return self::buildBasic($type, get_option('iiifapibridge_api_prefix_name') . $id, $name, $hostPrefix);
     }
-    
+
     /**
      * Build a URI in IIIF Presentation API 2.x recommended form.
-     * 
-     * @param string $type The type of URI to build. 
+     *
+     * @param string $type The type of URI to build.
      * @param string $id
      * @param string $name
      * @param string $hostPrefix (optional) The overriding host URL prefix.
@@ -104,7 +104,7 @@ class IiifApiBridge_Util_Uri {
                 throw new IiifApiBridge_Exception_UnknownUriTypeException;
         }
     }
-    
+
     /**
      * Return the full URL prefix of the current Omeka installation.
      * @return string
@@ -116,7 +116,7 @@ class IiifApiBridge_Util_Uri {
 //        $urlPrefix = public_url('');
 //        return $urlRoot . $urlPrefix;
     }
-    
+
     /**
      * Return the full API URL of the top-level collection to synchronize with.
      * @return string

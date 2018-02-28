@@ -12,25 +12,25 @@ class IiifApiBridge_BaseRequest {
      * @var Zend_Http_Client
      */
     private $__httpClient;
-    
+
     /**
      * The authentication key attached to requests.
      * @var string
      */
     private $__authenticationKey;
-    
+
     /**
      * The URL root to the IIIF API instance.
      * @var string
      */
     private $__apiRoot;
-    
+
     /**
      * The latest verb used in a request for this helper.
      * @var string
      */
     private $__lastVerb;
-    
+
     /**
      * Build a new request helper.
      */
@@ -40,7 +40,7 @@ class IiifApiBridge_BaseRequest {
         $this->__apiRoot = get_option('iiifapibridge_api_root');
         $this->__lastVerb = 'GET';
     }
-    
+
     /**
      * Make an authenticated JSON request to the given URL relative to the root.
      * @param string $verb
@@ -51,7 +51,7 @@ class IiifApiBridge_BaseRequest {
     protected function authJsonRequest($verb, $url, $json) {
         return $this->__recordedJsonRequest($verb, $this->__authenticationKey, $url, $json);
     }
-    
+
     /**
      * Make an unauthenticated JSON request to the given URL relative to the root.
      * @param string $verb
@@ -62,7 +62,7 @@ class IiifApiBridge_BaseRequest {
     protected function rawJsonRequest($verb, $url, $json) {
         return $this->__recordedJsonRequest($verb, NULL, $url, $json);
     }
-    
+
     /**
      * Repeat the last request made using this helper.
      * @return array
@@ -70,7 +70,7 @@ class IiifApiBridge_BaseRequest {
     public function repeatJsonRequest() {
         return $this->__httpClient->request($this->__lastVerb);
     }
-    
+
     /**
      * Record the verb and make a JSON request.
      * @param string $verb

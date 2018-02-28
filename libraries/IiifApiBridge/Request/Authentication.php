@@ -23,7 +23,7 @@
  * @package IiifApiBridge/Request
  */
 class IiifApiBridge_Request_Authentication extends IiifApiBridge_BaseRequest {
-    
+
     /**
      * Send a login request.
      * @param string $user The user name.
@@ -44,7 +44,7 @@ class IiifApiBridge_Request_Authentication extends IiifApiBridge_BaseRequest {
         }
         return NULL;
     }
-    
+
     /**
      * Send a token verification request.
      * @param string $token The token to verify.
@@ -63,5 +63,5 @@ class IiifApiBridge_Request_Authentication extends IiifApiBridge_BaseRequest {
         }
         return false;
     }
-    
+
 }

@@ -1,4 +1,4 @@
-<?php 
+<?php
 echo head(array(
     'title' => __('IIIF API Bridge'),
 ));

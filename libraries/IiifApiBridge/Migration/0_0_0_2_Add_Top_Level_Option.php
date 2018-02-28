@@ -23,13 +23,13 @@
  * @package IiifApiBridge/Migration
  */
 class IiifApiBridge_Migration_0_0_0_2_Add_Top_Level_Option extends IiifApiBridge_BaseMigration {
-    
+
     /**
      * The applicable version for this migration.
      * @var string
      */
     public static $version = '0.0.0.2';
-    
+
     /**
      * Migrate up.
      */
@@ -37,5 +37,5 @@ class IiifApiBridge_Migration_0_0_0_2_Add_Top_Level_Option extends IiifApiBridge
         set_option('iiifapibridge_api_top_name', '');
         set_option('iiifapibridge_api_prefix_name', '');
     }
-    
+
 }

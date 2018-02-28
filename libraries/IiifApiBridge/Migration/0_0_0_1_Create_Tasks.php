@@ -23,13 +23,13 @@
  * @package IiifApiBridge/Migration
  */
 class IiifApiBridge_Migration_0_0_0_1_Create_Tasks extends IiifApiBridge_BaseMigration {
-    
+
     /**
      *
-     * @var type 
+     * @var type
      */
     public static $version = '0.0.0.1';
-    
+
     /**
      * Migrate up.
      */
@@ -48,5 +48,5 @@ class IiifApiBridge_Migration_0_0_0_1_Create_Tasks extends IiifApiBridge_BaseMig
 SQL
         );
     }
-    
+
 }

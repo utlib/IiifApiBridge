@@ -23,7 +23,7 @@
  * @package IiifApiBridge/Table
  */
 class Table_IiifApiBridge_Task extends Omeka_Db_Table {
-    
+
     /**
      * Return the latest task for the given record.
      * @param Record $record
@@ -36,7 +36,7 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
         $select->where('record_type = ?', get_class($record));
         return $this->fetchObject($select);
     }
-    
+
     /**
      * Return the next queued task to execute.
      * @return IiifApiBridge_Task
@@ -47,7 +47,7 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
         $select->where('status = ?', array(IiifApiBridge_Task::STATUS_QUEUED));
         return $this->fetchObject($select);
     }
-    
+
     /**
      * Insert a daemon update task.
      * @param Record|array $record A Collection, Item, or associative array with 'type' and 'id' keys
@@ -71,7 +71,7 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
         $newTask->verb = strtoupper($verb);
         $newTask->data = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $newTask->save();
-        
+
         // Boot the daemon if enabled but not started
         if (empty(get_option('iiifapibridge_daemon_id')) && !empty(get_option('iiifapibridge_daemon_enabled'))) {
             Zend_Registry::get('bootstrap')->getResource('jobs')->sendLongRunning('IiifApiBridge_Job_UpdateDaemon', array());
@@ -82,11 +82,11 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
             $daemonProcess = $processTable->fetchObject($processSelect);
             set_option('iiifapibridge_daemon_id', $daemonProcess->id);
         }
-        
+
         // Return the inserted task
         return $newTask;
     }
-    
+
     /**
      * Insert a daemon update tas with backup URL and verb.
      * @param Record|array $record A Collection, Item, or associative array with 'type' and 'id' keys
@@ -114,7 +114,7 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
         $newTask->backup_verb = strtoupper($backupVerb);
         $newTask->data = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $newTask->save();
-        
+
         // Boot the daemon if enabled but not started
         if (empty(get_option('iiifapibridge_daemon_id')) && !empty(get_option('iiifapibridge_daemon_enabled'))) {
             Zend_Registry::get('bootstrap')->getResource('jobs')->sendLongRunning('IiifApiBridge_Job_UpdateDaemon', array());
@@ -125,7 +125,7 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
             $daemonProcess = $processTable->fetchObject($processSelect);
             set_option('iiifapibridge_daemon_id', $daemonProcess->id);
         }
-        
+
         // Return the inserted task
         return $newTask;
     }

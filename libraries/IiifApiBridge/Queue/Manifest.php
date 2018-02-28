@@ -23,7 +23,7 @@
  * @package IiifApiBridge/Queue
  */
 class IiifApiBridge_Queue_Manifest {
-    
+
     /**
      * Submit a JSON manifest to the API for creation.
      * @param Collection $manifest
@@ -37,7 +37,7 @@ class IiifApiBridge_Queue_Manifest {
             'manifest' => $json
         ));
     }
-    
+
     /**
      * Submit a JSON manifest to the API for updating.
      * @param Collection $manifest
@@ -51,7 +51,7 @@ class IiifApiBridge_Queue_Manifest {
             'manifest' => $json
         ));
     }
-    
+
     /**
      * Request that the API delete a manifest with the given item ID in its URI.
      * @param string $id The item ID.
@@ -60,5 +60,5 @@ class IiifApiBridge_Queue_Manifest {
     public static function delete($id) {
         return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor(array('id' => $id, 'type' => 'Collection'), "/{$id}/manifest", 'DELETE', NULL);
     }
-    
+
 }

@@ -22,27 +22,27 @@
  * @author University of Toronto Libraries
  */
 class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
-    
+
     /**
      * The initial delay between queue polls.
      */
     const INITIAL_DELAY = 1;
-    
+
     /**
      * The increment for the delay between queue polls when a queue is undone.
      */
     const DELAY_INCREMENT = 1;
-    
+
     /**
      * The maximum delay between queue polls.
      */
     const MAX_DELAY = 10;
-    
+
     /**
      * The maximum timeout for a queued API task.
      */
     const TIMEOUT = 180;
-    
+
     /**
      * Main runnable method.
      */
@@ -71,7 +71,7 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
             debug("IIIF API Daemon exception: {$ex->getMessage()}");
         }
     }
-    
+
     /**
      * Perform a single queued task (first try).
      * @param IiifApiBridge_Task $task
@@ -80,7 +80,7 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
     private function tryTask($task) {
         return $this->performTask($task);
     }
-    
+
     /**
      * Perform a single queued task (second try).
      * @param IiifApiBridge_Task $task
@@ -93,7 +93,7 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
         }
         return $result;
     }
-    
+
     /**
      * Perform a single queued task.
      * @param IiifApiBridge_Task $task
@@ -169,7 +169,7 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
         $task->finish();
         return true;
     }
-    
+
     /**
      * Transform the queue URL back to a relative from the API's root.
      * @param string $queueUrl
@@ -179,5 +179,5 @@ class IiifApiBridge_Job_UpdateDaemon extends Omeka_Job_AbstractJob {
         $comps = explode('/', $queueUrl);
         return '/' . join('/', array_slice($comps, -2, 2));
     }
-    
+
 }

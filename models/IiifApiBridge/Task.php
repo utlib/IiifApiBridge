@@ -23,93 +23,93 @@
  * @package IiifApiBridge/models
  */
 class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
-    
+
     /**
      * Status code for when the task is waiting to be run.
      */
     const STATUS_QUEUED = 'queued';
-    
+
     /**
      * Status code for when the task is running.
      */
     const STATUS_RUNNING = 'running';
-    
+
     /**
      * Status code for when the task is done.
      */
     const STATUS_DONE = 'done';
-    
+
     /**
      * Status code for when the task is done but has failed.
      */
     const STATUS_FAILED = 'failed';
-    
+
     /**
      * The database ID for this task.
      * @var int
      */
     public $id;
-    
+
     /**
      * The database ID for the associated record.
      * @var int
      */
     public $record_id;
-    
+
     /**
      * The class name for the associated record.
      * @var string
      */
     public $record_type;
-    
+
     /**
      * Status of the task. Can be "queued", "running", "done" or "failed".
      * @var string
      */
     public $status;
-    
+
     /**
      * The URL to send the request to.
      * @var string
      */
     public $url;
-    
+
     /**
      * The verb to use for the request.
      * @var string
      */
     public $verb;
-    
+
     /**
      * The backup URL to use for the request, if the first fails.
      * @var string
      */
     public $backup_url;
-    
+
     /**
      * The backup verb to use for the request, if the first fails.
      * @var string
      */
     public $backup_verb;
-    
+
     /**
      * Body data for the task.
      * @var string
      */
     public $data;
-    
+
     /**
      * Datetime on which the task was first created.
      * @var timestamp
      */
     public $added;
-    
+
     /**
      * Datetime on which the task was last updated.
      * @var timestamp
      */
     public $modified;
-    
+
     /**
      * Initialize mixins.
      * Add the timestamp mixin.
@@ -117,7 +117,7 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
     protected function _initialize_Mixins() {
         $this->_mixins[] = new Mixin_Timestamp($this);
     }
-    
+
     /**
      * Return the associated record for this task.
      * @return Record
@@ -125,7 +125,7 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
     public function getRecord() {
         return get_record_by_id($this->record_type, $this->record_id);
     }
-    
+
     /**
      * Set the associated record for this task.
      * @param Record $record
@@ -134,7 +134,7 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
         $this->record_type = get_class($record);
         $this->record_id = $record->id;
     }
-    
+
     /**
      * Set the status of this task to running.
      * @param boolean $doSave Whether to perform a save after setting the status.
@@ -145,7 +145,7 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
             $this->save();
         }
     }
-    
+
     /**
      * Set the status of this task to done.
      * @param boolean $doSave Whether to perform a save after setting the status.
@@ -156,7 +156,7 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
             $this->save();
         }
     }
-    
+
     /**
      * Set the status of this task to failed.
      * @param boolean $doSave Whether to perform a save after setting the status.
@@ -167,7 +167,7 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
             $this->save();
         }
     }
-    
+
     /**
      * Return the decoded JSON data embodied in this task.
      * @param boolean $asArray
@@ -176,7 +176,7 @@ class IiifApiBridge_Task extends Omeka_Record_AbstractRecord {
     public function getJsonData($asArray=true) {
         return json_decode($this->data, !$asArray);
     }
-    
+
     /**
      * Set the encoded JSON data embodied in this task.
      * @param array|object $jsonData

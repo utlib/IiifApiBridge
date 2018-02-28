@@ -53,7 +53,7 @@ SQL
         set_option('iiifapibridge_api_top_name', '');
         set_option('iiifapibridge_api_prefix_name', '');
 	}
-	
+
     /**
      * Hook: On uninstallation.
      */
@@ -102,7 +102,7 @@ SQL
     /**
      * Hook: On plugin configuration form submission.
      * Process submitted configurations.
-     * 
+     *
      * @param array $args
      * @throws Omeka_Validate_Exception
      */
@@ -130,17 +130,17 @@ SQL
     /**
      * Hook: Define routes.
      * Pull routes from routes.ini.
-     * 
+     *
      * @param array $args
      */
 	public function hookDefineRoutes($args) {
 		$args['router']->addConfig(new Zend_Config_Ini(dirname(__FILE__) . '/routes.ini', 'routes'));
 	}
-    
+
     /**
      * Hook: Rendering sidebar in collection show view.
      * Add status widget.
-     * 
+     *
      * @param array $args
      */
     public function hookAdminCollectionsShowSidebar($args) {
@@ -151,11 +151,11 @@ SQL
             require IIIF_API_BRIDGE_DIRECTORY . '/sidebar.php';
         }
     }
-    
+
     /**
      * Hook: Rendering sidebar in item show view.
      * Add status widget.
-     * 
+     *
      * @param array $args
      */
     public function hookAdminItemsShowSidebar($args) {
@@ -166,7 +166,7 @@ SQL
             require IIIF_API_BRIDGE_DIRECTORY . '/sidebar.php';
         }
     }
-    
+
     /**
      * Hook: After item is saved.
      * @param array $args
@@ -204,7 +204,7 @@ SQL
             }
         }
     }
-    
+
     /**
      * Hook: Before item is deleted.
      * @param array $args
@@ -230,7 +230,7 @@ SQL
             }
         }
     }
-    
+
     /**
      * Hook: After collection is saved.
      * @param array $args
@@ -270,7 +270,7 @@ SQL
             }
         }
     }
-    
+
     /**
      * Hook: Before collection is deleted.
      * @param array $args
@@ -290,7 +290,7 @@ SQL
             ), false);
         }
     }
-    
+
     /**
      * Filter: Admin-side main nav
      * Add the IIIF API Sync Bridge admin screen for admins and super-users

@@ -5,7 +5,7 @@
  * @package IiifApiBridge/Controller
  */
 class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionController {
-    
+
     /**
      * Redirect to main status menu.
      * GET /iiif-api-bridge
@@ -14,7 +14,7 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
         // Redirect to status
         $this->_helper->redirector->goto(array(), 'status');
     }
-    
+
     /**
      * Renders the main status menu for admins only.
      * GET /iiif-api-bridge/status
@@ -30,7 +30,7 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
         // Daemon status message
         $this->view->daemon_status = $this->__getDaemonStatusMessage();
     }
-    
+
     /**
      * The authentication status update AJAX endpoint.
      * Format: { "auth_status": "message" }
@@ -43,7 +43,7 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
         // Respond
         $this->_respondWithJson(array('auth_status' => $authStatusMessage));
     }
-    
+
     /**
      * The daemon status update AJAX endpoint.
      * Format: { "daemon_status": "message" }
@@ -56,7 +56,7 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
         // Respond
         $this->_respondWithJson(array('daemon_status' => $daemonStatusMessage));
     }
-    
+
     public function daemonRestartAction() {
         Zend_Registry::get('bootstrap')->getResource('jobs')->sendLongRunning('IiifApiBridge_Job_UpdateDaemon', array());
         $processTable = get_db()->getTable('Process');
@@ -67,7 +67,7 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
         set_option('iiifapibridge_daemon_id', $daemonProcess->id);
         $this->daemonStatusAction();
     }
-    
+
     /**
      * Return an authentication status message
      * @return string
@@ -86,7 +86,7 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
             return $message;
         }
     }
-    
+
     /**
      * Return a daemon status message
      * @return string
@@ -114,7 +114,7 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
             return __('The daemon is sleeping.');
         }
     }
-    
+
     /**
      * Throw 403 status when the current user isn't an admin.
      * @throws Omeka_Controller_Exception_403
@@ -125,10 +125,10 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
             throw new Omeka_Controller_Exception_403;
         }
     }
-    
+
     /**
      * Respond with JSON data (no layout).
-     * 
+     *
      * @param array $jsonData JSON data in nested array form
      * @param integer $status The HTTP response code
      */
@@ -141,10 +141,10 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
         $response->clearBody();
         $response->setBody(json_encode($jsonData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
-    
+
     /**
      * Respond with raw data.
-     * 
+     *
      * @param string $data Response data
      * @param integer $status The HTTP response code
      * @param string $mime The MIME type

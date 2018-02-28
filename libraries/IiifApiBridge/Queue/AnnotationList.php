@@ -23,7 +23,7 @@
  * @package IiifApiBridge/Queue
  */
 class IiifApiBridge_Queue_AnnotationList {
-    
+
     /**
      * Submit a JSON annotation list to the API for creation.
      * @param Item $item The annotated item.
@@ -38,7 +38,7 @@ class IiifApiBridge_Queue_AnnotationList {
             'annotationList' => $json
         ));
     }
-    
+
     /**
      * Submit a JSON annotation list to the API for updating.
      * @param Item $item The annotated item.
@@ -53,7 +53,7 @@ class IiifApiBridge_Queue_AnnotationList {
             'annotationList' => $json
         ));
     }
-    
+
     /**
      * Request that the API delete an annotation list with the given item ID and name in its URI.
      * @param string $id The item ID.
@@ -63,5 +63,5 @@ class IiifApiBridge_Queue_AnnotationList {
     public static function delete($id, $name) {
         return get_db()->getTable('IiifApiBridge_Task')->insertTaskFor(array('id' => $id, 'type' => 'Item'), "/{$id}/list/{$name}", 'DELETE', array());
     }
-    
+
 }

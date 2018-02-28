@@ -23,21 +23,21 @@
  * @package IiifApiBridge/Exception
  */
 class IiifApiBridge_Exception_FailedJsonRequestException extends Exception {
-    
+
     /**
      * The HTTP response code.
      * @var int
      */
     private $__responseCode;
-    
+
     /**
      * The decoded response body.
      * @var array
      */
     private $__responseBody;
-    
+
     /**
-     * 
+     *
      * @param int $responseCode
      * @param array $responseBody
      * @param string $message
@@ -49,7 +49,7 @@ class IiifApiBridge_Exception_FailedJsonRequestException extends Exception {
         $this->__responseCode = $responseCode;
         $this->__responseBody = $responseBody;
     }
-    
+
     /**
      * Return the HTTP response code.
      * @return int
@@ -57,7 +57,7 @@ class IiifApiBridge_Exception_FailedJsonRequestException extends Exception {
     public function getResponseCode() {
         return $this->__responseCode;
     }
-    
+
     /**
      * Return the HTTP response body, JSON-decoded.
      * @return array

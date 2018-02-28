@@ -23,7 +23,7 @@
  * @package IiifApiBridge/Controller
  */
 class IiifApiBridge_UpdateController extends Omeka_Controller_AbstractActionController {
-    
+
     /**
      * Initiate an update for the given collection/item.
      * Redirect back if successful.
@@ -88,10 +88,10 @@ class IiifApiBridge_UpdateController extends Omeka_Controller_AbstractActionCont
             throw new Omeka_Controller_Exception_404;
         }
     }
-    
+
     /**
      * Respond with JSON data (no layout).
-     * 
+     *
      * @param array $jsonData JSON data in nested array form
      * @param integer $status The HTTP response code
      */
@@ -104,5 +104,5 @@ class IiifApiBridge_UpdateController extends Omeka_Controller_AbstractActionCont
         $response->clearBody();
         $response->setBody(json_encode($jsonData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
     }
-    
+
 }
