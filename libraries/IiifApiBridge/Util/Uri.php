@@ -122,6 +122,6 @@ class IiifApiBridge_Util_Uri {
      * @return string
      */
     public static function topCollection() {
-        return self::build(self::COLLECTION, null, get_option('iiifapibridge_api_top_name'));
+        return self::buildBasic(self::COLLECTION, null, get_option('iiifapibridge_api_top_name'));
     }
 }
