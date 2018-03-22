@@ -13,6 +13,11 @@ class IiifApiBridge_Form_Config extends Omeka_Form {
         parent::init();
         $this->applyOmekaStyles();
         $this->setAutoApplyOmekaStyles(false);
+        $this->addElement('checkbox', 'iiifapibridge_daemon_enabled', array(
+            'label' => __('Daemon Enabled?'),
+            'description' => __("Whether to automatically run the update daemon upon creating, updating or deleting a IIIF-enabled resource. Please turn off before doing batch operations to minimize server load."),
+            'value' => get_option('iiifapibridge_daemon_enabled'),
+        ));
         $this->addElement('text', 'iiifapibridge_api_root', array(
             'label' => __('IIIF API Root'),
             'description' => __('The base URL of the IIIF API installation.'),
@@ -30,7 +35,7 @@ class IiifApiBridge_Form_Config extends Omeka_Form {
         ));
         $this->addElement('text', 'iiifapibridge_api_prefix_name', array(
             'label' => __('Top-Level Prefix'),
-            'description' => __(""),
+            'description' => __("Prefix to add before item/collection IDs while mapping to API URIs."),
             'value' => get_option('iiifapibridge_api_prefix_name'),
         ));
     }

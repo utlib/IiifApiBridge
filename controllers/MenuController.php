@@ -57,6 +57,17 @@ class IiifApiBridge_MenuController extends Omeka_Controller_AbstractActionContro
         $this->_respondWithJson(array('daemon_status' => $daemonStatusMessage));
     }
     
+    public function daemonRestartAction() {
+        Zend_Registry::get('bootstrap')->getResource('jobs')->sendLongRunning('IiifApiBridge_Job_UpdateDaemon', array());
+        $processTable = get_db()->getTable('Process');
+        $processSelect = $processTable->getSelect();
+        $processSelect->order('id DESC');
+        $processSelect->where("args LIKE '%IiifApiBridge_Job_UpdateDaemon%'");
+        $daemonProcess = $processTable->fetchObject($processSelect);
+        set_option('iiifapibridge_daemon_id', $daemonProcess->id);
+        $this->daemonStatusAction();
+    }
+    
     /**
      * Return an authentication status message
      * @return string

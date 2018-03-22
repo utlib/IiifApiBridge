@@ -15,6 +15,8 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
 		'config',
 		'config_form',
 		'define_routes',
+        'admin_collections_show_sidebar',
+        'admin_items_show_sidebar',
         'after_save_item',
         'before_delete_item',
         'after_save_collection',
@@ -45,7 +47,9 @@ SQL
         . ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
         set_option('iiifapibridge_api_key', '');
         set_option('iiifapibridge_api_root', '');
+        set_option('iiifapibridge_api_top_name', '');
         set_option('iiifapibridge_daemon_id', '');
+        set_option('iiifapibridge_daemon_enabled', '1');
         set_option('iiifapibridge_api_top_name', '');
         set_option('iiifapibridge_api_prefix_name', '');
 	}
@@ -58,7 +62,9 @@ SQL
         $db->query("DROP TABLE IF EXISTS `{$db->prefix}iiif_api_bridge_tasks`;");
         delete_option('iiifapibridge_api_key');
         delete_option('iiifapibridge_api_root');
+        delete_option('iiifapibridge_api_top_name');
         delete_option('iiifapibridge_daemon_id');
+        delete_option('iiifapibridge_daemon_enabled');
         delete_option('iiifapibridge_api_top_name');
         delete_option('iiifapibridge_api_prefix_name');
     }
@@ -110,6 +116,7 @@ SQL
         set_option('iiifapibridge_api_key', $data['iiifapibridge_api_key']);
         set_option('iiifapibridge_api_top_name', $data['iiifapibridge_api_top_name']);
         set_option('iiifapibridge_api_prefix_name', $data['iiifapibridge_api_prefix_name']);
+        set_option('iiifapibridge_daemon_enabled', $data['iiifapibridge_daemon_enabled'] ? '1' : '');
 	}
 
     /**
@@ -129,6 +136,36 @@ SQL
 	public function hookDefineRoutes($args) {
 		$args['router']->addConfig(new Zend_Config_Ini(dirname(__FILE__) . '/routes.ini', 'routes'));
 	}
+    
+    /**
+     * Hook: Rendering sidebar in collection show view.
+     * Add status widget.
+     * 
+     * @param array $args
+     */
+    public function hookAdminCollectionsShowSidebar($args) {
+        $collection = $args['collection'];
+        $thing = $collection;
+        $task = get_db()->getTable('IiifApiBridge_Task')->getLatestTaskFor($collection);
+        if (IiifItems_Util_Manifest::isManifest($collection) || IiifItems_Util_Collection::isCollection($collection)) {
+            require IIIF_API_BRIDGE_DIRECTORY . '/sidebar.php';
+        }
+    }
+    
+    /**
+     * Hook: Rendering sidebar in item show view.
+     * Add status widget.
+     * 
+     * @param array $args
+     */
+    public function hookAdminItemsShowSidebar($args) {
+        $item = $args['item'];
+        $thing = $item;
+        $task = get_db()->getTable('IiifApiBridge_Task')->getLatestTaskFor($item);
+        if (!IiifItems_Util_Canvas::isNonIiifItem($item)) {
+            require IIIF_API_BRIDGE_DIRECTORY . '/sidebar.php';
+        }
+    }
     
     /**
      * Hook: After item is saved.

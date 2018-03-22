@@ -17,6 +17,14 @@ jQuery(function() {
     // Handle "Refresh" button under authentication status
     jQuery('#refresh_daemon_status').on('click', refreshDaemonStatus);
     
+    // Handle Daemon force-restart
+    jQuery('#restart_daemon').on('click', function() {
+        jQuery.post(jQuery(this).data('url')).done(function(data) {
+            jQuery('#daemon_status').html(data['daemon_status']);
+        });
+        return false;
+    });
+    
     // Refresh daemon status every 5 seconds
     setInterval(refreshDaemonStatus, 5000);
 });

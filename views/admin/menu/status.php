@@ -17,4 +17,5 @@ echo flash();
 <p id="daemon_status"><?php echo $daemon_status; ?></p>
 
 <button id="refresh_daemon_status" class="green button" data-url="<?php echo admin_url(array(), 'iiifapibridge_daemon_status'); ?>"><?php echo __('Refresh'); ?></button>
-<button class="blue button"><?php echo __('Force Restart'); ?></button>
+
+<button id="restart_daemon" class="blue button" data-url="<?php echo admin_url(array(), 'iiifapibridge_daemon_restart'); ?>"><?php echo __('Force Restart'); ?></button>

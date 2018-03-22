@@ -72,8 +72,8 @@ class Table_IiifApiBridge_Task extends Omeka_Db_Table {
         $newTask->data = json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         $newTask->save();
         
-        // Boot the daemon if not started
-        if (empty(get_option('iiifapibridge_daemon_id'))) {
+        // Boot the daemon if enabled but not started
+        if (empty(get_option('iiifapibridge_daemon_id')) && !empty(get_option('iiifapibridge_daemon_enabled'))) {
             Zend_Registry::get('bootstrap')->getResource('jobs')->sendLongRunning('IiifApiBridge_Job_UpdateDaemon', array());
             $processTable = get_db()->getTable('Process');
             $processSelect = $processTable->getSelect();
