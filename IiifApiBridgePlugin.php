@@ -15,18 +15,10 @@ class IiifApiBridgePlugin extends Omeka_Plugin_AbstractPlugin
 		'config',
 		'config_form',
 		'define_routes',
-        'iiifitems_new_collection',
-        'iiifitems_edit_collection',
-        'iiifitems_delete_collection',
-        'iiifitems_new_manifest',
-        'iiifitems_edit_manifest',
-        'iiifitems_delete_manifest',
-        'iiifitems_new_canvas',
-        'iiifitems_edit_canvas',
-        'iiifitems_delete_canvas',
-        'iiifitems_new_annotation',
-        'iiifitems_edit_annotation',
-        'iiifitems_delete_annotation',
+        'after_save_item',
+        'before_delete_item',
+        'after_save_collection',
+        'before_delete_collection',
 	);
 
 	protected $_filters = array(
@@ -126,147 +118,126 @@ SQL
 	}
     
     /**
-     * Hook: IIIF Toolkit generated a new collection.
-     * 
+     * Hook: After item is saved.
      * @param array $args
      */
-    public function hookIiifitemsNewCollection($args) {
-        $collection = $args['collection'];
-        $parentCollection = $args['parent_collection'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformCollection($json, $collection, $parentCollection);
-        IiifApiBridge_Queue_Collection::create($collection, $json);
+    public function hookAfterSaveItem($args) {
+        $item = $args['record'];
+        if ($item->item_type_id != get_option('iiifitems_annotation_item_type')) {
+            $json = IiifItems_Util_Canvas::buildCanvas($item);
+            IiifApiBridge_Util_JsonTransform::transformCanvas($json, $item);
+            if ($args['insert']) {
+                IiifApiBridge_Queue_Canvas::create($item, $json);
+            } else {
+                IiifApiBridge_Queue_Canvas::update($item, $json);
+            }
+            if (!empty($item->collection_id)) {
+                $this->hookAfterSaveCollection(array(
+                    'record' => get_record_by_id('Collection', $item->collection_id),
+                    'insert' => false,
+                ));
+            }
+        } else {
+            $annotatedItem = IiifItems_Util_Annotation::findAnnotatedItemFor($item);
+            $json = IiifItems_Util_Annotation::buildAnnotation($item);
+            IiifApiBridge_Util_JsonTransform::transformAnnotation($json, $item, $annotatedItem);
+            if ($args['insert']) {
+                IiifApiBridge_Queue_Annotation::create($item, $json);
+            } else {
+                IiifApiBridge_Queue_Annotation::update($item, $json);
+            }
+            if (!empty($annotatedItem->collection_id)) {
+                $this->hookAfterSaveCollection(array(
+                    'record' => get_record_by_id('Collection', $annotatedItem->collection_id),
+                    'insert' => false,
+                ));
+            }
+        }
     }
     
     /**
-     * Hook: IIIF Toolkit edited a collection.
-     * 
+     * Hook: Before item is deleted.
      * @param array $args
      */
-    public function hookIiifitemsEditCollection($args) {
-        $collection = $args['collection'];
-        $parentCollection = $args['parent_collection'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformCollection($json, $collection, $parentCollection);
-        IiifApiBridge_Queue_Collection::update($collection, $json);
+    public function hookBeforeDeleteItem($args) {
+        $item = $args['record'];
+        if ($item->item_type_id != get_option('iiifitems_annotation_item_type')) {
+            IiifApiBridge_Queue_Canvas::delete($item->collection_id, $item->id);
+            if (!empty($item->collection_id)) {
+                $this->hookAfterSaveCollection(array(
+                    'record' => get_record_by_id('Collection', $item->collection_id),
+                    'insert' => false,
+                ));
+            }
+        } else {
+            $attachedItem = IiifItems_Util_Annotation::findAnnotatedItemFor($item);
+            IiifApiBridge_Queue_Annotation::delete($attachedItem->collection_id, $item->id);
+            if (!empty($attachedItem->collection_id)) {
+                $this->hookAfterSaveCollection(array(
+                    'record' => get_record_by_id('Collection', $attachedItem->collection_id),
+                    'insert' => false,
+                ));
+            }
+        }
     }
     
     /**
-     * Hook: IIIF Toolkit deleted a collection.
-     * 
+     * Hook: After collection is saved.
      * @param array $args
+     * @param bool $bubble Whether to bubble up.
      */
-    public function hookIiifitemsDeleteCollection($args) {
-        $collection = $args['collection'];
-//        $parentCollection = $args['parent_collection'];
-        IiifApiBridge_Queue_Collection::delete($collection->id);
+    public function hookAfterSaveCollection($args, $bubble=true) {
+        $collection = $args['record'];
+        if (IiifItems_Util_Manifest::isManifest($collection)) {
+            $parentCollection = IiifItems_Util_Manifest::findParentFor($collection);
+            $json = IiifItems_Util_Manifest::buildManifest($collection);
+            IiifApiBridge_Util_JsonTransform::transformManifest($json, $collection, $parentCollection);
+            if ($args['insert']) {
+                IiifApiBridge_Queue_Manifest::create($collection, $json);
+            } else {
+                IiifApiBridge_Queue_Manifest::update($collection, $json);
+            }
+            if (!empty($parentCollection) && $bubble) {
+                $this->hookAfterSaveCollection(array(
+                    'record' => $parentCollection,
+                    'insert' => false,
+                ), false);
+            }
+        } elseif (IiifItems_Util_Collection::isCollection($collection)) {
+            $parentCollection = IiifItems_Util_Collection::findParentFor($collection);
+            $json = IiifItems_Util_Collection::buildCollection($collection);
+            IiifApiBridge_Util_JsonTransform::transformCollection($json, $collection, $parentCollection);
+            if ($args['insert']) {
+                IiifApiBridge_Queue_Collection::create($collection, $json);
+            } else {
+                IiifApiBridge_Queue_Collection::update($collection, $json);
+            }
+            if (!empty($parentCollection) && $bubble) {
+                $this->hookAfterSaveCollection(array(
+                    'record' => $parentCollection,
+                    'insert' => false,
+                ), false);
+            }
+        }
     }
     
     /**
-     * Hook: IIIF Toolkit generated a new manifest.
-     * 
+     * Hook: Before collection is deleted.
      * @param array $args
      */
-    public function hookIiifitemsNewManifest($args) {
-        $manifest = $args['manifest'];
-        $parentCollection = $args['parent_collection'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformManifest($json, $manifest, $parentCollection);
-        IiifApiBridge_Queue_Manifest::create($manifest, $json);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit edited a manifest.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsEditManifest($args) {
-        $manifest = $args['manifest'];
-        $parentCollection = $args['parent_collection'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformManifest($json, $manifest, $parentCollection);
-        IiifApiBridge_Queue_Manifest::update($manifest, $json);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit deleted a manifest.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsDeleteManifest($args) {
-        $manifest = $args['manifest'];
-//        $parentCollection = $args['parent_collection'];
-        IiifApiBridge_Queue_Manifest::delete($manifest->id);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit generated a new canvas.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsNewCanvas($args) {
-        $canvas = $args['item'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformCanvas($json, $canvas);
-        IiifApiBridge_Queue_Canvas::create($canvas, $json);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit edited a manifest.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsEditCanvas($args) {
-        $canvas = $args['item'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformCanvas($json, $canvas);
-        IiifApiBridge_Queue_Canvas::update($canvas, $json);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit deleted a manifest.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsDeleteCanvas($args) {
-        $canvas = $args['item'];
-        IiifApiBridge_Queue_Canvas::delete($canvas->collection_id, $canvas->id);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit generated a new annotation.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsNewAnnotation($args) {
-        $annotation = $args['annotation'];
-        $attachedItem = $args['attached_item'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformAnnotation($json, $annotation, $attachedItem);
-        IiifApiBridge_Queue_Annotation::create($annotation, $json);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit edited a annotation.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsEditAnnotation($args) {
-        $annotation = $args['annotation'];
-        $attachedItem = $args['attached_item'];
-        $json = $args['json'];
-        IiifApiBridge_Util_JsonTransform::transformAnnotation($json, $annotation, $attachedItem);
-        IiifApiBridge_Queue_Annotation::update($annotation, $json);
-    }
-    
-    /**
-     * Hook: IIIF Toolkit deleted a annotation.
-     * 
-     * @param array $args
-     */
-    public function hookIiifitemsDeleteAnnotation($args) {
-        $annotation = $args['annotation'];
-        $attachedItem = $args['attached_item'];
-        IiifApiBridge_Queue_Annotation::delete($attachedItem->collection_id, $annotation->id);
+    public function hookBeforeDeleteCollection($args) {
+        $collection = $args['record'];
+        $parentCollection = IiifItems_Util_Collection::findParentFor($collection);
+        if (IiifItems_Util_Manifest::isManifest($collection)) {
+            IiifApiBridge_Queue_Manifest::delete($collection->id);
+        } else if (IiifItems_Util_Collection::isCollection($collection)) {
+            IiifApiBridge_Queue_Collection::delete($collection->id);
+        }
+        if (!empty($parentCollection)) {
+            $this->hookAfterSaveCollection(array(
+                'record' => $parentCollection,
+                'insert' => false,
+            ), false);
+        }
     }
 }

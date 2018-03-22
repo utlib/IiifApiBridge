@@ -16,8 +16,10 @@ class IiifApiBridge_Util_JsonTransform {
         $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $collection->id);
         // Add belongsTo attribute
         $root = get_option('iiifapibridge_api_root') . '/';
-        $json['belongsTo'] = empty($parentCollection) ? array() : array(IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $parentCollection->id, $root));
-        
+        $topName = get_option('iiifapibridge_api_top_name');
+        if (!empty($parentCollection) || !empty($topName)) {
+            $json['within'] = empty($parentCollection) ? (empty($topName) ? '' : IiifApiBridge_Util_Uri::topCollection()) : IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $parentCollection->id, $root);
+        }
         // Replace URI for sub-manifests
         if (!empty($json['manifests'])) {
             $referenceSubmanifests = IiifItems_Util_Collection::findSubmanifestsFor($collection);
@@ -61,7 +63,10 @@ class IiifApiBridge_Util_JsonTransform {
         $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::MANIFEST, $manifest->id, NULL);
         // Add belongsTo attribute
         $root = get_option('iiifapibridge_api_root') . '/';
-        $json['belongsTo'] = empty($parentCollection) ? array() : array(IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $parentCollection->id, $root));
+        $topName = get_option('iiifapibridge_api_top_name');
+        if (!empty($parentCollection) || !empty($topName)) {
+            $json['within'] = empty($parentCollection) ? (empty($topName) ? '' : IiifApiBridge_Util_Uri::topCollection()) : IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::COLLECTION, NULL, $parentCollection->id, $root);
+        }
         // For each seqnum => sequence
         foreach ($json['sequences'] as $seqnum => &$sequence) {
             // Change JSON ID to recommended form, id=item.collection_id, name=seqnum
@@ -96,9 +101,6 @@ class IiifApiBridge_Util_JsonTransform {
         // Change the top-level URI
         $root = get_option('iiifapibridge_api_root') . '/';
         $json['@id'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $item->collection_id, $item->id, $root);
-        // Add belongsTo and embeddedEntirely attribute
-//        $json['belongsTo'] = array(IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::SEQUENCE, $item->collection_id, 0, $root));
-//        $json['embeddedEntirely'] = true;
         // For each imagenum => image
         foreach ($json['images'] as $imageNum => &$image) {
             // Change URI to recommended form, id=item.collection_id, name=i-item.id-imagenum
@@ -153,13 +155,6 @@ class IiifApiBridge_Util_JsonTransform {
         elseif (is_array($json['on'])) {
             // COMPROMISE: Take on XYWH area of first region
             $json['on'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id, $root) . '#' . $json['on'][0]['selector']['default']['value'];
-//            // For each on
-//            foreach ($json['on'] as &$attachOn) {
-//                // Replace full JSON ID with recommended URI, id=attached_item.collection_id, name=attached_item.id
-//                $attachOn['full'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::CANVAS, $attachedItem->collection_id, $attachedItem->id);
-//                // Replace within JSON ID with recommended URI, id=attached_item.collection_id
-//                $attachOn['within'] = IiifApiBridge_Util_Uri::build(IiifApiBridge_Util_Uri::MANIFEST, $attachedItem->collection_id, NULL);
-//            }
         }
     }
     
