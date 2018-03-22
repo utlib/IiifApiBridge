@@ -31,7 +31,7 @@ class IiifApiBridge_Queue_AnnotationList {
      * @return IiifApiBridge_Task The created task.
      */
     public static function create($item, $json) {
-        $pathComponents = split('/', $json['@id']);
+        $pathComponents = explode('/', $json['@id']);
         $convertedPath = '/' . join('/', array_slice($pathComponents, -3, 2));
         $convertedBackupPath = '/' . join('/', array_slice($pathComponents, -3));
         return get_db()->getTable('IiifApiBridge_Task')->insertTaskWithBackupFor($item, $convertedPath, 'POST', $convertedBackupPath, 'PUT', array(
@@ -46,7 +46,7 @@ class IiifApiBridge_Queue_AnnotationList {
      * @return IiifApiBridge_Task The created task.
      */
     public static function update($item, $json) {
-        $pathComponents = split('/', $json['@id']);
+        $pathComponents = explode('/', $json['@id']);
         $convertedPath = '/' . join('/', array_slice($pathComponents, -3));
         $convertedBackupPath = '/' . join('/', array_slice($pathComponents, -3, 2));
         return get_db()->getTable('IiifApiBridge_Task')->insertTaskWithBackupFor($item, $convertedPath, 'PUT', $convertedBackupPath, 'POST', array(

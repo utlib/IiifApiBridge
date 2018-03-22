@@ -44,7 +44,7 @@ class IiifApiBridge_Queue_Collection {
      * @return IiifApiBridge_Task The created task.
      */
     public static function update($collection, $json) {
-        $pathComponents = split('/', $json['@id']);
+        $pathComponents = explode('/', $json['@id']);
         $convertedPath = '/' . join('/', array_slice($pathComponents, -2));
         return get_db()->getTable('IiifApiBridge_Task')->insertTaskWithBackupFor($collection, $convertedPath, 'PUT', '/collections', 'POST', array(
             'collection' => $json
