@@ -46,6 +46,8 @@ SQL
         set_option('iiifapibridge_api_key', '');
         set_option('iiifapibridge_api_root', '');
         set_option('iiifapibridge_daemon_id', '');
+        set_option('iiifapibridge_api_top_name', '');
+        set_option('iiifapibridge_api_prefix_name', '');
 	}
 	
     /**
@@ -57,6 +59,8 @@ SQL
         delete_option('iiifapibridge_api_key');
         delete_option('iiifapibridge_api_root');
         delete_option('iiifapibridge_daemon_id');
+        delete_option('iiifapibridge_api_top_name');
+        delete_option('iiifapibridge_api_prefix_name');
     }
 
     /**
@@ -104,6 +108,8 @@ SQL
         $data = $args['post'];
         set_option('iiifapibridge_api_root', rtrim($data['iiifapibridge_api_root'], '/'));
         set_option('iiifapibridge_api_key', $data['iiifapibridge_api_key']);
+        set_option('iiifapibridge_api_top_name', $data['iiifapibridge_api_top_name']);
+        set_option('iiifapibridge_api_prefix_name', $data['iiifapibridge_api_prefix_name']);
 	}
 
     /**

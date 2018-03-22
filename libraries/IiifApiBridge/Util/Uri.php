@@ -51,7 +51,7 @@ class IiifApiBridge_Util_Uri {
     const RESOURCE = 'Resource';
     
     /**
-     * Build a URI in IIIF Presentation API 2.x recommended form.
+     * Build a URI in IIIF Presentation API 2.x recommended form, with top-level prefix added.
      * 
      * @param string $type The type of URI to build. 
      * @param string $id
@@ -61,6 +61,23 @@ class IiifApiBridge_Util_Uri {
      * @throws IiifApiBridge_Exception_UnknownUriTypeException
      */
     public static function build($type, $id, $name, $hostPrefix=NULL) {
+        if ($type === self::COLLECTION) {
+            return self::buildBasic($type, $id, get_option('iiifapibridge_api_prefix_name') . $name, $hostPrefix);
+        }
+        return self::buildBasic($type, get_option('iiifapibridge_api_prefix_name') . $id, $name, $hostPrefix);
+    }
+    
+    /**
+     * Build a URI in IIIF Presentation API 2.x recommended form.
+     * 
+     * @param string $type The type of URI to build. 
+     * @param string $id
+     * @param string $name
+     * @param string $hostPrefix (optional) The overriding host URL prefix.
+     * @return string
+     * @throws IiifApiBridge_Exception_UnknownUriTypeException
+     */
+    public static function buildBasic($type, $id, $name, $hostPrefix=NULL) {
         if (empty($hostPrefix)) {
             $hostPrefix = self::localHostPrefix();
         }
@@ -98,5 +115,13 @@ class IiifApiBridge_Util_Uri {
 //        $urlRoot = $serverUrlHelper->serverUrl();
 //        $urlPrefix = public_url('');
 //        return $urlRoot . $urlPrefix;
+    }
+    
+    /**
+     * Return the full API URL of the top-level collection to synchronize with.
+     * @return string
+     */
+    public static function topCollection() {
+        return self::build(self::COLLECTION, null, get_option('iiifapibridge_api_top_name'));
     }
 }
